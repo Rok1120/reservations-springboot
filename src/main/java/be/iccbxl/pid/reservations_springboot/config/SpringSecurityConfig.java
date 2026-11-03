@@ -2,29 +2,17 @@ package be.iccbxl.pid.reservations_springboot.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 @Configuration
-@EnableMethodSecurity(prePostEnabled = true)
 public class SpringSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(BCryptVersion.$2Y, 12);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            final AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -33,7 +21,8 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests(auth -> { auth
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/login", "/login**", "/css/**", "/js/**",
-                                "/forgot-password", "/reset-password", "/reset-success").permitAll()
+                                "/forgot-password", "/reset-password", "/reset-success",
+                                "/registration", "/register").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/user").hasRole("MEMBER")
                         .anyRequest().authenticated();
@@ -43,12 +32,7 @@ public class SpringSecurityConfig {
                         .usernameParameter("login")
                         .failureUrl("/login?loginError=true")
                         .permitAll())
-                .logout((logout) -> logout
-                        .logoutSuccessUrl("/login?logoutSuccess=true")
-                        .permitAll())
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(
-                                new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))
+                .logout((logout) -> logout.permitAll())
                 .build();
     }
 }
